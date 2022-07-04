@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block all_courses %}
+
+<h1> Courses </h1>
+
+<ul class="list-group">
+
+    {% for course in courses %}
+
+    <li class="list-group-item">
+        {{course.name}}
+        {{course.code}}
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#detailsModal">
+            Details
+        </button>
+    </li>
+
+    <!-- Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Course Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-unstyled">
+                        <li><b>Name:</b> {{course.name}}</li>
+                        <li><b>Code:</b> {{course.code}}</li>
+                        <li><b>Program:</b> {{course.program}}</li>
+                        <li><b>ECTS:</b> {{course.ects}}</li>
+                        <li><b>Semester (full-time student):</b> {{course.semester_ft}}.</li>
+                        <li><b>Semester (part-time student):</b> {{course.semester_pt}}.</li>
+                        <li><b>Elective:</b> {{course.elective}}</li>
+                        <li><b>Lecturer:</b> {{course.lecturer}}</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+
+</ul>
+
+{% endblock %}

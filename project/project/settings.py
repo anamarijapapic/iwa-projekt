@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +126,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Substituting a custom User model
 AUTH_USER_MODEL = 'app.MyUser'
+
+# Authentication - login settings
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'all_courses'
