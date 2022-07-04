@@ -4,32 +4,46 @@
 
 <h1> Courses </h1>
 
+{% if request.user.is_superuser %}
+    <a href="{% url 'add_course' %}" class="btn btn-primary my-3" role="button">Add Course</a>
+{% endif %}
+
 <ul class="list-group">
 
     {% for course in courses %}
 
     <li class="list-group-item">
         {{course.name}}
-        {{course.code}}
+        ({{course.code}})
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#detailsModal">
+        <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#detailsModal{{course.id}}">
             Details
         </button>
+        {% if request.user.is_superuser %}
+            <a href="{% url 'edit_course' course.id %}" class="btn btn-sm btn-primary" role="button">Edit</a>
+            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{course.id}}">
+                Delete
+            </button>
+        {% endif %}
     </li>
 
-    <!-- Modal -->
-    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <!-- Details Modal -->
+    <div class="modal fade" id="detailsModal{{course.id}}" tabindex="-1" aria-labelledby="detailsModal{{course.id}}Label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="detailsModalLabel">Course Details</h5>
+                    <h5 class="modal-title" id="detailsModal{{course.id}}Label">Course Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="list-unstyled">
                         <li><b>Name:</b> {{course.name}}</li>
                         <li><b>Code:</b> {{course.code}}</li>
-                        <li><b>Program:</b> {{course.program}}</li>
+                        {% if not course.program %}
+                            <li><b>Program:</b> Program nije unesen </li>
+                        {% else %}
+                            <li><b>Program:</b> {{course.program}}</li>
+                        {% endif %}
                         <li><b>ECTS:</b> {{course.ects}}</li>
                         <li><b>Semester (full-time student):</b> {{course.semester_ft}}.</li>
                         <li><b>Semester (part-time student):</b> {{course.semester_pt}}.</li>
@@ -39,6 +53,24 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal{{course.id}}" tabindex="-1" aria-labelledby="deleteModal{{course.id}}Label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModal{{course.id}}Label">Delete Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete course <b>{{course.name}} ({{course.code}})</b>?</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="{% url 'delete_course' course.id %}" class="btn btn-sm btn-danger" role="button">Delete</a>
                 </div>
             </div>
         </div>

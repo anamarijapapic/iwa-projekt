@@ -25,7 +25,7 @@ class MyUser(AbstractUser):
     status = models.CharField(max_length=20, choices=STATUS)
 
 class Course(models.Model):
-    ELECTIVE = (('DA', 'da'), ('NE', 'ne'))
+    ELECTIVE = (('da', 'da'), ('ne', 'ne'))
 
     name = models.CharField(max_length=80)
     code = models.CharField(max_length=10)

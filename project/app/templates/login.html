@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %} 
+
 {% block login %}
 
     <div class="card px-4 text-center">
         <div class="card-body">
             <h1 class="card-title">EnrollmentApp Login</h1>
             <p class="card-text">
-                <form method="post" novalidate>
+                <form method="post">
                     {% csrf_token %}
-                    {% include 'includes/bootstrap_form.html' with form=form %}
+                    {{form|crispy}}
                     <input type="submit" value="Login" class="btn btn-primary">
                 </form>
             </p>

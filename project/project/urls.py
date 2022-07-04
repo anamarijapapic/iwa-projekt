@@ -23,4 +23,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name="login.html"), name='login'),
     path('logout/', LogoutView.as_view(template_name="logout.html"), name='logout'),
     path('all_courses/', views.all_courses, name='all_courses'),
+    path('add_course/', views.add_course, name='add_course'),
+    path('edit_course/<int:course_id>', views.edit_course, name="edit_course"),
+    path('delete_course/<int:course_id>', views.delete_course, name="delete_course"),
 ]
