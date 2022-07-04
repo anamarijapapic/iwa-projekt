@@ -15,10 +15,13 @@ class Role(models.Model):
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
+    def __str__(self):
+        return self.role
+
 class MyUser(AbstractUser):
     STATUS = (('none', 'None'), ('redovni', 'redovni student'), ('izvanredni', 'izvanredni student'))
 
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True)
     status = models.CharField(max_length=20, choices=STATUS)
 
 class Course(models.Model):
