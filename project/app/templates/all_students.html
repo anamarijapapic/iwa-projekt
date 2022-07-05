@@ -7,6 +7,7 @@
 {% if request.user.is_superuser %}
     <a href="{% url 'add_user' 'STUDENT' %}" class="btn btn-primary my-3" role="button">Add Student</a>
     <br/>
+    <a href="{% url 'all_students' %}" class="btn btn-sm btn-light my-3" role="button">Students (All)</a>
     <a href="{% url 'students_ft' %}" class="btn btn-sm btn-light my-3" role="button">Students (Full-time)</a>
     <a href="{% url 'students_pt' %}" class="btn btn-sm btn-light my-3" role="button">Students (Part-time)</a>
 {% endif %}
@@ -38,6 +39,7 @@
                         <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{student.id}}">
                             Delete
                         </button>
+                        <a href="{% url 'enrollment_list' student.id %}" class="btn btn-sm btn-secondary" role="button">Enrollment List</a>
                     {% endif %}
                 </td>
             </tr>
@@ -54,7 +56,8 @@
                             <p>Are you sure you want to delete student <b>{{student.first_name}} {{student.last_name}}</b>?</p>
                         </div>
                         <div class="modal-footer">
-                            <a href="{% url 'delete_user' student.id %}" class="btn btn-sm btn-danger" role="button">Delete</a>
+                            <a href="{% url 'delete_user' student.id %}" class="btn btn-danger" role="button">Delete</a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         </div>
                     </div>
                 </div>

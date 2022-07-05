@@ -1,16 +1,29 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseNotAllowed
 from app.decorators import admin_required
-from .models import Course, MyUser, Role
+from .models import Course, EnrollmentList, MyUser, Role
 from django.contrib.auth.decorators import login_required
 from .forms import CourseForm, MyUserEditForm, StudentForm, ProfessorForm
+from django.db.models import Q
 
 # Create your views here.
 
 @login_required
+def home(request):
+    if request.user.role.role == Role.ADMIN or request.user.role.role == Role.PROFESSOR:
+        return redirect('all_courses')
+    return redirect('enrollment_list', request.user.id)
+
+@login_required
 def all_courses(request):
-    courses = Course.objects.all()
-    return render(request, 'all_courses.html', {"courses": courses})
+    if request.user.role.role == Role.ADMIN:
+        courses = Course.objects.all()
+        return render(request, 'all_courses.html', {"courses": courses})
+    elif request.user.role.role == Role.PROFESSOR:
+        courses = Course.objects.filter(lecturer=request.user.id)
+        return render(request, 'all_courses.html', {"courses": courses})
+    else:
+        return HttpResponse("Access Forbidden!")
 
 @admin_required
 def add_course(request):
@@ -47,12 +60,12 @@ def delete_course(request, course_id):
 
 @admin_required
 def all_students(request):
-    students = MyUser.objects.filter(role_id__role=Role.STUDENT)
+    students = MyUser.objects.filter(role_id__role=Role.STUDENT).order_by('last_name', 'first_name')
     return render(request, 'all_students.html', {"students": students})
 
 @admin_required
 def all_professors(request):
-    professors = MyUser.objects.filter(role_id__role=Role.PROFESOR)
+    professors = MyUser.objects.filter(role_id__role=Role.PROFESSOR).order_by('last_name', 'first_name')
     return render(request, 'all_professors.html', {"professors": professors})
 
 @admin_required
@@ -60,9 +73,9 @@ def add_user(request, role):
     if request.method == 'GET':
         if role == Role.STUDENT:
             userForm = StudentForm()
-        elif role == Role.PROFESOR:
+        elif role == Role.PROFESSOR:
             userForm = ProfessorForm()
-        return render(request, 'add_user.html', {'form': userForm})
+        return render(request, 'add_user.html', {'form': userForm, 'role': role.capitalize()})
     elif request.method == 'POST':
         if role == Role.STUDENT:
             userForm = StudentForm(request.POST)
@@ -71,7 +84,7 @@ def add_user(request, role):
                 return redirect('all_students')
             else:
                 return HttpResponse("Submit Failure! Invalid Form!")
-        elif role == Role.PROFESOR:
+        elif role == Role.PROFESSOR:
             userForm = ProfessorForm(request.POST)
             if userForm.is_valid():
                 userForm.save()
@@ -89,7 +102,10 @@ def edit_user(request, user_id):
         userForm = MyUserEditForm(request.POST, instance=user)
         if userForm.is_valid():
             userForm.save()
-            return redirect('all_courses')
+            if user.role.role == Role.STUDENT:
+                return redirect('all_students')
+            else:
+                return redirect('all_professors')
         else:
             return HttpResponse("Submit Failure! Invalid Form!")
 
@@ -97,14 +113,54 @@ def edit_user(request, user_id):
 def delete_user(request, user_id):
     user = MyUser.objects.get(id=user_id)
     user.delete() 
-    return redirect('all_courses')
+    if user.role.role == Role.STUDENT:
+        return redirect('all_students')
+    return redirect('all_professors')
 
 @admin_required
 def students_ft(request):
-    students = MyUser.objects.filter(role_id__role=Role.STUDENT, status="redovni")
+    students = MyUser.objects.filter(role_id__role=Role.STUDENT, status="redovni").order_by('last_name', 'first_name')
     return render(request, 'all_students.html', {'students': students})
 
 @admin_required
 def students_pt(request):
-    students = MyUser.objects.filter(role_id__role=Role.STUDENT, status="izvanredni")
+    students = MyUser.objects.filter(role_id__role=Role.STUDENT, status="izvanredni").order_by('last_name', 'first_name')
     return render(request, 'all_students.html', {'students': students})
+
+@login_required
+def enrollment_list(request, student_id):
+    if request.user.role.role == Role.ADMIN or request.user.role.role == Role.STUDENT and request.user.id == student_id:
+        try:
+            student = MyUser.objects.get(id=student_id)
+        except MyUser.DoesNotExist:
+            student = None
+            return HttpResponse("Access Denied! User does not exist!")
+        if student.role.role != Role.STUDENT:
+            return HttpResponse("Access Denied! User is not student!")
+        enrollment_record_course_ids = EnrollmentList.objects.filter(student=student).values_list('course_id', flat=True)
+        available_courses = Course.objects.exclude(id__in=enrollment_record_course_ids)
+        enrolled_courses = Course.objects.exclude(~Q(id__in=enrollment_record_course_ids)).order_by('id')
+    else:
+        return HttpResponse("Access Denied!")
+    return render(request, 'enrollment_list.html', {'student': student, 'available_courses': available_courses, 'enrolled_courses': enrolled_courses})
+
+@login_required
+def enroll_course(request, student_id, course_id):
+    if request.user.role.role == Role.ADMIN or request.user.role.role == Role.STUDENT and request.user.id == student_id:
+        student = MyUser.objects.get(id=student_id)
+        course = Course.objects.get(id=course_id)
+        EnrollmentList.objects.create(student=student, course=course)
+    else:
+        return HttpResponse("Access Denied!")
+    return redirect('enrollment_list', student_id)
+
+@login_required
+def disenroll_course(request, student_id, course_id):
+    if request.user.role.role == Role.ADMIN or request.user.role.role == Role.STUDENT and request.user.id == student_id:
+        enrollment_record = EnrollmentList.objects.filter(student_id=student_id, course_id=course_id).first()
+        if enrollment_record.status=='upisan':
+            record = EnrollmentList.objects.get(student_id=student_id, course_id=course_id)
+            record.delete()
+        else:
+            return HttpResponse("Action Not Possible!")
+    return redirect('enrollment_list', student_id)

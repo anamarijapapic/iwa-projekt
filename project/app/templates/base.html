@@ -39,6 +39,16 @@
                         <a href="{% url 'all_professors' %}" class="nav-link">Professors</a>
                     </li>
                     {% endif %}
+                    {% if request.user.role.role == 'PROFESSOR' %}
+                    <li class="nav-item">
+                        <a href="{% url 'all_courses' %}" class="nav-link">Courses</a>
+                    </li>
+                    {% endif %}
+                    {% if request.user.role.role == 'STUDENT' %}
+                    <li class="nav-item">
+                        <a href="{% url 'enrollment_list' user.id %}" class="nav-link">Enrollment List</a>
+                    </li>
+                    {% endif %}
                 </ul>
                 {% if request.user.is_authenticated %}
                     <span class="navbar-text">
@@ -75,6 +85,9 @@
         {% endblock %}
 
         {% block edit_user %}
+        {% endblock %}
+
+        {% block enrollment_list %}
         {% endblock %}
     </div>
 

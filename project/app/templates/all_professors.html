@@ -5,7 +5,7 @@
 <h1> Professors </h1>
 
 {% if request.user.is_superuser %}
-    <a href="{% url 'add_user' 'PROFESOR' %}" class="btn btn-primary my-3" role="button">Add Professor</a>
+    <a href="{% url 'add_user' 'PROFESSOR' %}" class="btn btn-primary my-3" role="button">Add Professor</a>
 {% endif %}
 
 <table class="table">
@@ -46,10 +46,11 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <p>Are you sure you want to delete student <b>{{professor.first_name}} {{professor.last_name}}</b>?</p>
+                            <p>Are you sure you want to delete professor <b>{{professor.first_name}} {{professor.last_name}}</b>?</p>
                         </div>
                         <div class="modal-footer">
-                            <a href="{% url 'delete_user' professor.id %}" class="btn btn-sm btn-danger" role="button">Delete</a>
+                            <a href="{% url 'delete_user' professor.id %}" class="btn btn-danger" role="button">Delete</a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         </div>
                     </div>
                 </div>

@@ -133,4 +133,4 @@ AUTH_USER_MODEL = 'app.MyUser'
 
 # Authentication - login settings
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'all_courses'
+LOGIN_REDIRECT_URL = 'home'

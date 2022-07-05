@@ -5,11 +5,11 @@ from django.contrib.auth.models import AbstractUser
 
 class Role(models.Model):
     ADMIN = 'ADMIN'
-    PROFESOR = 'PROFESOR'
+    PROFESSOR = 'PROFESSOR'
     STUDENT = 'STUDENT'
     ROLE_CHOICES = [
         (ADMIN, 'admin'),
-        (PROFESOR, 'profesor'),
+        (PROFESSOR, 'professor'),
         (STUDENT, 'student'),
     ]
 
@@ -21,7 +21,7 @@ class Role(models.Model):
 class MyUser(AbstractUser):
     STATUS = (('none', 'None'), ('redovni', 'redovni student'), ('izvanredni', 'izvanredni student'))
 
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True)
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=20, choices=STATUS)
 
 class Course(models.Model):
@@ -34,7 +34,7 @@ class Course(models.Model):
     semester_ft = models.IntegerField()
     semester_pt = models.IntegerField()
     elective = models.CharField(max_length=2, choices=ELECTIVE)
-    lecturer = models.ForeignKey(MyUser, on_delete=models.CASCADE, null=True)
+    lecturer = models.ForeignKey(MyUser, on_delete=models.SET_NULL, null=True)
 
 class EnrollmentList(models.Model):
     STATUS = (('upisan', 'upisan'), ('polozen', 'polozen'), ('izgubljen_potpis', 'izgubljen potpis'))
