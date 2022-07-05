@@ -139,7 +139,10 @@ def enrollment_list(request, student_id):
             return HttpResponse("Access Denied! User is not student!")
         enrollment_record_course_ids = EnrollmentList.objects.filter(student=student).values_list('course_id', flat=True)
         available_courses = Course.objects.exclude(id__in=enrollment_record_course_ids)
-        enrolled_courses = Course.objects.exclude(~Q(id__in=enrollment_record_course_ids)).order_by('id')
+        if student.status == 'redovni':
+            enrolled_courses = Course.objects.exclude(~Q(id__in=enrollment_record_course_ids)).order_by('id')
+        else:
+            enrolled_courses = Course.objects.exclude(~Q(id__in=enrollment_record_course_ids)).order_by('semester_pt', 'id')
     else:
         return HttpResponse("Access Denied!")
     return render(request, 'enrollment_list.html', {'student': student, 'available_courses': available_courses, 'enrolled_courses': enrolled_courses})
@@ -161,8 +164,10 @@ def disenroll_course(request, student_id, course_id):
         if enrollment_record.status == 'upisan':
             record = EnrollmentList.objects.get(student_id=student_id, course_id=course_id)
             record.delete()
+        elif enrollment_record.status=='polozen':
+            return HttpResponse("Action Not Possible! Course Passed!")
         else:
-            return HttpResponse("Action Not Possible!")
+            return HttpResponse("Action Not Possible! Lost Signature!")
     return redirect('enrollment_list', student_id)
 
 @login_required
