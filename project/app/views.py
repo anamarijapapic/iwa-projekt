@@ -119,11 +119,13 @@ def delete_user(request, user_id):
 
 @admin_required
 def students_ft(request):
+    # full-time students
     students = MyUser.objects.filter(role_id__role=Role.STUDENT, status="redovni").order_by('last_name', 'first_name')
     return render(request, 'all_students.html', {'students': students})
 
 @admin_required
 def students_pt(request):
+    # part-time students
     students = MyUser.objects.filter(role_id__role=Role.STUDENT, status="izvanredni").order_by('last_name', 'first_name')
     return render(request, 'all_students.html', {'students': students})
 

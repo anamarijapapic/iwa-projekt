@@ -5,6 +5,48 @@ SOSS Kopilica, Računarstvo - 2. godina, 4. semestar; akademska godina 2021./202
 
 Nositeljica predmeta: Marina Rodić, v. pred.  
 
+## Running locally  
+
+Clone the repository:
+```bash
+git clone https://github.com/anamarijapapic/iwa-projekt.git
+```
+
+Move into cloned directory: 
+```bash
+cd iwa-projekt
+```
+
+Create a virtual environment:
+```bash
+python -m venv venv
+```
+
+Activate the virtual environment:
+```bash
+venv\Scripts\activate
+```
+
+Move into directory with project files:
+```bash
+cd project
+```
+
+Install the requirements:
+```bash
+pip install -r requirements.txt
+```
+
+Apply migrations to database:
+```bash
+python manage.py migrate
+```
+
+Run app:
+```bash
+python manage.py runserver
+```
+The development server will be started at http://127.0.0.1:8000/  
 
 # Zadatak za projekt
 
