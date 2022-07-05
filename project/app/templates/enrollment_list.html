@@ -3,7 +3,7 @@
 {% block enrollment_list %}
 
 <h1> Enrollment List </h1>
-<h5> Student: {{student.first_name}} {{student.last_name}} ({{student.username}}, {{student.email}})</h5>
+<h5> Student: {{student.first_name}} {{student.last_name}} ({{student.username}}, {{student.email}}) </h5>
 
 <div class="row">
     <div class="col-12 col-md-7 my-3">
@@ -12,12 +12,16 @@
                 Available Courses
             </div>
             <ul class="list-group list-group-flush">
+
                 {% for course in available_courses %}
+
                     <li class="list-group-item">
                         {{course.name}} ({{course.code}})
                         <a href="{% url 'enroll_course' student.id course.id %}" class="btn btn-sm btn-primary" role="button">Enroll</a>
                     </li>
+
                 {% endfor %}
+                
             </ul>
         </div>
     </div>
@@ -26,33 +30,44 @@
             <div class="card-header">
                 Enrolled Courses
             </div>
-            <div class="accordion accordion-flush" id="accordionFlushExample">
-                {% if student.status == 'redovni' %}
-                    {% regroup enrolled_courses by semester_ft as enrolled_courses_grouped %}
-                {% else %}
-                    {% regroup enrolled_courses by semester_pt as enrolled_courses_grouped %}
-                {% endif %}
-                {% for semester in enrolled_courses_grouped %}
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="flush-heading{{semester.grouper}}">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{semester.grouper}}" aria-expanded="false" aria-controls="flush-collapse{{semester.grouper}}">
-                                Semester #{{semester.grouper}}
-                            </button>
-                        </h2>
-                        <div id="flush-collapse{{semester.grouper}}" class="accordion-collapse collapse" aria-labelledby="flush-heading{{semester.grouper}}" data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">
-                                <ul class="list-group list-group-flush">
+            <div class="card-body">
+                <div class="accordion accordion-flush" id="accordionFlushExample">
+
+                    {% if student.status == 'redovni' %}
+                        {% regroup enrolled_courses by semester_ft as enrolled_courses_grouped %}
+                    {% else %}
+                        {% regroup enrolled_courses by semester_pt as enrolled_courses_grouped %}
+                    {% endif %}
+
+                    {% for semester in enrolled_courses_grouped %}
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-heading{{semester.grouper}}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{semester.grouper}}" aria-expanded="false" aria-controls="flush-collapse{{semester.grouper}}">
+                                    Semester #{{semester.grouper}}
+                                </button>
+                            </h2>
+                            <div id="flush-collapse{{semester.grouper}}" class="accordion-collapse collapse" aria-labelledby="flush-heading{{semester.grouper}}" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+                                    <ul class="list-group list-group-flush">
+
                                     {% for course in semester.list %}
+
                                         <li class="list-group-item">
                                             {{course.name}} ({{course.code}})
                                             <a href="{% url 'disenroll_course' student.id course.id %}" class="btn btn-sm btn-danger" role="button">Disenroll</a>
                                         </li>
+
                                     {% endfor %}
-                                </ul>
+
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
+                
+                    {% endfor %}
+
+                </div>
             </div>
         </div>
     </div>

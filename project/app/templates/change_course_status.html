@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block change_course_status %}
+
+<h1> Change Status </h1>
+<h5> Course: {{record.course.name}} ({{record.course.code}}) </h5>
+<h5> Student: {{record.student.first_name}} {{record.student.last_name}} ({{record.student.username}}, {{record.student.email}}) </h5>
+
+<form method="post">
+    {% csrf_token %}
+    {{form|crispy}}
+    <input type="submit" value="Save Changes" class="btn btn-success">
+</form>
+
+{% endblock %}

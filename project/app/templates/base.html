@@ -28,10 +28,14 @@
                             <a href="{% url 'login' %}" class="btn btn-secondary" role="button">Login</a>
                         {% endif %}
                     </li>
-                    {% if request.user.is_superuser %}
+
+                    {% if request.user.is_superuser or request.user.role.role == 'PROFESSOR' %}
                     <li class="nav-item">
                         <a href="{% url 'all_courses' %}" class="nav-link">Courses</a>
                     </li>
+                    {% endif %}
+
+                    {% if request.user.is_superuser %}
                     <li class="nav-item">
                         <a href="{% url 'all_students' %}" class="nav-link">Students</a>
                     </li>
@@ -39,17 +43,14 @@
                         <a href="{% url 'all_professors' %}" class="nav-link">Professors</a>
                     </li>
                     {% endif %}
-                    {% if request.user.role.role == 'PROFESSOR' %}
-                    <li class="nav-item">
-                        <a href="{% url 'all_courses' %}" class="nav-link">Courses</a>
-                    </li>
-                    {% endif %}
+                    
                     {% if request.user.role.role == 'STUDENT' %}
                     <li class="nav-item">
                         <a href="{% url 'enrollment_list' user.id %}" class="nav-link">Enrollment List</a>
                     </li>
                     {% endif %}
                 </ul>
+                
                 {% if request.user.is_authenticated %}
                     <span class="navbar-text">
                         You are logged in as <b>{{user.username}}</b>.
@@ -88,6 +89,12 @@
         {% endblock %}
 
         {% block enrollment_list %}
+        {% endblock %}
+
+        {% block students_on_course %}
+        {% endblock %}
+
+        {% block change_course_status %}
         {% endblock %}
     </div>
 

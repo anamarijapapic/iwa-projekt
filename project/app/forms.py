@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from .models import Course, MyUser, Role
+from .models import Course, EnrollmentList, MyUser, Role
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
@@ -56,3 +56,8 @@ class ProfessorForm(UserCreationForm):
         self.fields['last_name'].required = True
         self.fields['role'].queryset = Role.objects.filter(role=Role.PROFESSOR)
         self.fields['status'].choices = (('none', 'None'), )
+
+class CourseStatusForm(ModelForm):
+    class Meta:
+        model = EnrollmentList
+        fields = ['status']
