@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block all_students %}
+{% block students_final_year %}
 
 <h1> Students </h1>
 
@@ -12,6 +12,8 @@
     <a href="{% url 'students_pt' %}" class="btn btn-sm btn-light my-3" role="button">Students (Part-time)</a>
     <a href="{% url 'students_final_year' %}" class="btn btn-sm btn-light my-3" role="button">Students (Final Year)</a>
 {% endif %}
+
+<h5 class="my-3">Number of final year students: {{number}}</h5>
 
 <table class="table">
     <thead>

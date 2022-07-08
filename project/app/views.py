@@ -141,23 +141,24 @@ def students_pt(request):
     return render(request, 'all_students.html', {'students': students})
 
 @admin_required
-def students_last_year(request):
-    # last year students
-    last_year_students = []
+def students_final_year(request):
+    # final year students
+    final_year_students = []
     students = MyUser.objects.filter(role_id__role=Role.STUDENT)
     for student in students:
         records = EnrollmentList.objects.filter(student=student)
-        still_first_year = False
+        still_lower_year = False
         for record in records:
-            if (((record.course.semester_ft == 1 or record.course.semester_ft == 2) and student.status == 'redovni') or ((record.course.semester_pt == 1 or record.course.semester_pt == 2) and student.status == 'izvanredni')) and record.status != 'polozen':
-                # check if there is any 1st year courses that student didn't pass
-                still_first_year = True
+            if (((record.course.semester_ft == 1 or record.course.semester_ft == 2) and student.status == 'redovni') or ((record.course.semester_pt == 1 or record.course.semester_pt == 2 or record.course.semester_pt == 3 or record.course.semester_pt == 4) and student.status == 'izvanredni')) and record.status != 'polozen':
+                # check if courses from lower years are passed
+                still_lower_year = True
                 break
-            if (((record.course.semester_ft == 5 or record.course.semester_ft == 6) and student.status == 'redovni') or ((record.course.semester_pt == 7 or record.course.semester_pt == 8) and student.status == 'izvanredni')) and student not in last_year_students:
-                last_year_students.append(student)
-        if still_first_year and student in last_year_students:
-            last_year_students.remove(student)
-    return render(request, 'all_students.html', {'students': last_year_students})
+            if (((record.course.semester_ft == 5 or record.course.semester_ft == 6) and student.status == 'redovni') or ((record.course.semester_pt == 7 or record.course.semester_pt == 8) and student.status == 'izvanredni')) and student not in final_year_students:
+                final_year_students.append(student)
+        if still_lower_year and student in final_year_students:
+            final_year_students.remove(student)
+    num_final_year_students = len(final_year_students)
+    return render(request, 'students_final_year.html', {'students': final_year_students, 'number': num_final_year_students})
 
 @login_required
 def enrollment_list(request, student_id):
@@ -170,14 +171,27 @@ def enrollment_list(request, student_id):
         if student.role.role != Role.STUDENT:
             return HttpResponse("Access Denied! User is not student!")
 
-        # block enroll for 3rd/4rd year courses if not all courses from 1st year are passed
+        # block enroll for 3rd/4rd year courses if not all courses from 1st/2nd year are passed
         if student.status == 'redovni':
+            # full-time students - block enroll 3rd year courses if not all 1st year courses are passed
             higher_year_courses_ids = Course.objects.filter(Q(semester_ft=5) | Q(semester_ft=6)).values_list('id', flat=True)
-            first_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_ft=1) | Q(course__semester_ft=2)) & ~Q(status='polozen'))
+            lower_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_ft=1) | Q(course__semester_ft=2)) & ~Q(status='polozen'))
         else:
-            higher_year_courses_ids = Course.objects.filter(Q(semester_pt=5) | Q(semester_pt=6) | Q(semester_pt=7) | Q(semester_pt=8)).values_list('id', flat=True)
+            # part-time students - block enroll 3rd/4th year courses if not all 1st/2nd year courses are passed
+            third_year_courses_ids = Course.objects.filter(Q(semester_pt=5) | Q(semester_pt=6)).values_list('id', flat=True)
+            fourth_year_courses_ids = Course.objects.filter(Q(semester_pt=7) | Q(semester_pt=8)).values_list('id', flat=True)
+
             first_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_pt=1) | Q(course__semester_pt=2)) & ~Q(status='polozen'))
-        if first_year_courses_left:
+            second_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_pt=3) | Q(course__semester_pt=4)) & ~Q(status='polozen'))
+            
+            if first_year_courses_left:
+                higher_year_courses_ids = (third_year_courses_ids | fourth_year_courses_ids).distinct()
+                lower_year_courses_left = first_year_courses_left
+            else:
+                higher_year_courses_ids = fourth_year_courses_ids
+                lower_year_courses_left = second_year_courses_left
+                
+        if lower_year_courses_left:
             block_enroll_courses = Course.objects.exclude(~Q(id__in=higher_year_courses_ids)).order_by('id')
         else:
             block_enroll_courses = []
@@ -225,15 +239,23 @@ def enroll_course(request, student_id, course_id):
         student = MyUser.objects.get(id=student_id)
         course = Course.objects.get(id=course_id)
 
-        # block enroll for 3rd/4rd year courses if not all courses from 1st year are passed
+        # block enroll for 3rd/4rd year courses if not all courses from 1st/2nd year are passed
         if student.status == 'redovni':
+            # full-time students - block enroll 3rd year courses if not all 1st year courses are passed
             higher_year_courses_ids = Course.objects.filter(Q(semester_ft=5) | Q(semester_ft=6)).values_list('id', flat=True)
-            first_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_ft=1) | Q(course__semester_ft=2)) & ~Q(status='polozen'))
+            lower_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_ft=1) | Q(course__semester_ft=2)) & ~Q(status='polozen'))
         else:
-            higher_year_courses_ids = Course.objects.filter(Q(semester_pt=5) | Q(semester_pt=6) | Q(semester_pt=7) | Q(semester_pt=8)).values_list('id', flat=True)
-            first_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_pt=1) | Q(course__semester_pt=2)) & ~Q(status='polozen'))
-        if first_year_courses_left and course_id in higher_year_courses_ids:
-            return HttpResponse("Enroll Not Possible! Courses from 1st year left!")
+            # part-time students
+            if course.semester_pt == 5 or course.semester_pt == 6:
+                # block enroll 3rd year courses if not all 1st year courses are passed
+                higher_year_courses_ids = Course.objects.filter(Q(semester_pt=5) | Q(semester_pt=6) | Q(semester_pt=7) | Q(semester_pt=8)).values_list('id', flat=True)
+                lower_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_pt=1) | Q(course__semester_pt=2)) & ~Q(status='polozen'))
+            elif course.semester_pt == 7 or course.semester_pt == 8:
+                # block enroll 4th year courses if not all 1st and 2nd year courses are passed
+                higher_year_courses_ids = Course.objects.filter(Q(semester_pt=7) | Q(semester_pt=8)).values_list('id', flat=True)
+                lower_year_courses_left = EnrollmentList.objects.filter(Q(student=student) & Q(Q(course__semester_pt=1) | Q(course__semester_pt=2) | Q(course__semester_pt=3) | Q(course__semester_pt=4)) & ~Q(status='polozen'))
+        if lower_year_courses_left and course_id in higher_year_courses_ids:
+            return HttpResponse("Enroll Not Possible! Courses from lower year(s) left!")
         else:
             EnrollmentList.objects.create(student=student, course=course)
         
