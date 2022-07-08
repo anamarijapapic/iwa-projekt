@@ -5,10 +5,13 @@
 <h1>Students</h1>
 <h5>Course: {{course.name}} ({{course.code}})</h5>
 
-<a href="{% url 'students_on_course' course.id %}" class="btn btn-sm btn-light my-3" role="button">Students (All)</a>
-<a href="{% url 'students_on_course_filter' course.id 'izgubljen_potpis' %}" class="btn btn-sm btn-light my-3" role="button">Students (Lost Signature)</a>
-<a href="{% url 'students_on_course_filter' course.id 'upisan' %}" class="btn btn-sm btn-light my-3" role="button">Students (Enrolled)</a>
-<a href="{% url 'students_on_course_filter' course.id 'polozen' %}" class="btn btn-sm btn-light my-3" role="button">Students (Passed)</a>
+<a href="{% url 'students_on_course' course.id %}" class="btn btn-sm btn-light mt-3 mb-1" role="button">Students (All)</a>
+<a href="{% url 'students_on_course_filter' course.id 'redovni' %}" class="btn btn-sm btn-light mt-3 mb-1" role="button">Students (Full-time)</a>
+<a href="{% url 'students_on_course_filter' course.id 'izvanredni' %}" class="btn btn-sm btn-light mt-3 mb-1" role="button">Students (Part-time)</a>
+<br/>
+<a href="{% url 'students_on_course_filter' course.id 'izgubljen_potpis' %}" class="btn btn-sm btn-light mb-3" role="button">Students (Lost Signature)</a>
+<a href="{% url 'students_on_course_filter' course.id 'upisan' %}" class="btn btn-sm btn-light mb-3" role="button">Students (Enrolled)</a>
+<a href="{% url 'students_on_course_filter' course.id 'polozen' %}" class="btn btn-sm btn-light mb-3" role="button">Students (Passed)</a>
 
 <div class="table-responsive">
     <table class="table">

@@ -16,8 +16,12 @@
                 {% for course in available_courses %}
 
                     <li class="list-group-item">
-                        {{course.name}} ({{course.code}})
-                        <a href="{% url 'enroll_course' student.id course.id %}" class="btn btn-sm btn-primary" role="button">Enroll</a>
+                        {{course.name}} ({{course.code}})<span class="text-muted"> ({{course.ects}} ECTS) </span>
+                        {% if course in block_enroll_courses %}
+                            <a href="{% url 'enroll_course' student.id course.id %}" class="btn btn-sm btn-primary disabled" role="button">Enroll</a>
+                        {% else %}
+                            <a href="{% url 'enroll_course' student.id course.id %}" class="btn btn-sm btn-primary" role="button">Enroll</a>
+                        {% endif %}
                     </li>
 
                 {% endfor %}
@@ -52,10 +56,27 @@
                                     <ul class="list-group list-group-flush">
 
                                     {% for course in semester.list %}
-
+                                    
                                         <li class="list-group-item">
-                                            {{course.name}} ({{course.code}})
-                                            <a href="{% url 'disenroll_course' student.id course.id %}" class="btn btn-sm btn-danger" role="button">Disenroll</a>
+                                            {{course.name}} ({{course.code}})<span class="text-muted"> ({{course.ects}} ECTS)</span>
+                                            {% if course in block_disenroll_courses %}
+                                                <a href="{% url 'disenroll_course' student.id course.id %}" class="btn btn-sm btn-danger disabled" role="button">Disenroll</a>
+                                            {% else %}
+                                                <a href="{% url 'disenroll_course' student.id course.id %}" class="btn btn-sm btn-danger" role="button">Disenroll</a>
+                                            {% endif %}
+
+                                            <br/>
+                                            {% for record in course.enrollmentlist_set.all %}
+                                                {% if record.student == student %}
+                                                    {% if record.status == 'polozen' %}
+                                                        <p>Status: <span class="text-success">{{record.status}}</span></p>
+                                                    {% elif record.status == 'izgubljen_potpis' %}
+                                                        <p>Status: <span class="text-danger">{{record.status}}</span></p>
+                                                    {% else %}
+                                                        <p>Status: {{record.status}}</p>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
                                         </li>
 
                                     {% endfor %}
@@ -68,6 +89,21 @@
                     {% endfor %}
 
                 </div>
+            </div>
+            <div class="card-footer">
+                <h5>Stats:</h5>
+                <h6>Courses:</h6>
+                <dl class="row">
+                    <dd class="col-sm-4">Enrolled: {{courses_enrolled}}</dd>
+                    <dd class="col-sm-4 text-success">Passed: {{courses_passed}}</dd>
+                    <dd class="col-sm-4 text-danger">Lost Signature: {{courses_lost_signature}}</dd>
+                </dl>
+                <h6>ECTS Points:</h6>
+                <dl class="row">
+                    <dd class="col-sm-4">Total: {{total_ects}}</dd>
+                    <dd class="col-sm-4 text-success">Passed: {{total_ects_passed}}</dd>
+                    <dd class="col-sm-4 text-danger">Left: {{total_ects_left}}</dd>
+                </dl>
             </div>
         </div>
     </div>

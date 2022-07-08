@@ -15,7 +15,7 @@
     <li class="list-group-item">
         {{course.name}}
         ({{course.code}})
-        
+
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#detailsModal{{course.id}}">
             Details
@@ -31,6 +31,12 @@
         {% if request.user.is_superuser or request.user.role.role == 'PROFESSOR' %}
             <a href="{% url 'students_on_course' course.id %}" class="btn btn-sm btn-secondary" role="button">Show Students</a>
         {% endif %}
+
+        <br/>
+        <p class="small text-muted">
+            {{course.num_students_passed}} students passed ({{course.num_ft_passed}} full-time students and {{course.num_pt_passed}} part-time students).
+        </p>
+
     </li>
 
     <!-- Details Modal -->
